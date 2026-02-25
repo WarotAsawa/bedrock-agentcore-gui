@@ -3,3 +3,4 @@ history.json
 .kiro/
 scratchboard.md
 .aws-sam/
+.env
