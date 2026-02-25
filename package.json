@@ -1,0 +1,18 @@
+{
+  "name": "bedrock-agentcore-gui",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@aws-sdk/client-bedrock-agentcore": "^3.996.0",
+    "@aws-sdk/client-bedrock-agentcore-control": "^3.996.0",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.2.1"
+  }
+}

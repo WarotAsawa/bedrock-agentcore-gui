@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentCore Console</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+<div class="app-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-row">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/>
+            <line x1="12" y1="22" x2="12" y2="15.5"/>
+            <polyline points="22 8.5 12 15.5 2 8.5"/>
+          </svg>
+        </div>
+        <div>
+          <div class="logo-text">AgentCore Console</div>
+          <div class="logo-sub">Bedrock Runtime GUI</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Workspace</div>
+      <div class="nav-item active" data-view="chat" onclick="switchView('chat')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Chat
+        <span class="nav-badge" id="badge-chat">0</span>
+      </div>
+      <div class="nav-item" data-view="agents" onclick="switchView('agents')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="14"/><line x1="10" y1="10" x2="10" y2="14"/><line x1="14" y1="10" x2="14" y2="14"/></svg>
+        Agent Runtimes
+        <span class="nav-badge" id="badge-agents">-</span>
+      </div>
+      <div class="nav-item" data-view="gateways" onclick="switchView('gateways')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Gateways & Tools
+        <span class="nav-badge" id="badge-gateways">-</span>
+      </div>
+
+      <div class="nav-section-label" style="margin-top:12px">Sessions</div>
+      <button class="new-chat-btn" onclick="openNewChatModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Chat
+      </button>
+      <div id="session-list" class="session-list"></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="region-info">
+        <span class="region-dot"></span>
+        <span id="region-display">us-east-1</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="tab-group">
+          <button class="tab-btn active" data-tab="chat" onclick="switchView('chat')">Chat</button>
+          <button class="tab-btn" data-tab="agents" onclick="switchView('agents')">Agents</button>
+          <button class="tab-btn" data-tab="gateways" onclick="switchView('gateways')">Gateways</button>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="stream-indicator">
+          <span class="stream-dot"></span>
+          <span>Connected</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <!-- Chat View -->
+      <div class="view-panel active" id="view-chat" style="height:100%">
+        <div class="chat-header-bar" id="chat-header"></div>
+        <div class="chat-empty" id="chat-empty" style="display:flex">
+          <div class="chat-empty-inner">
+            <div class="chat-empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/>
+                <line x1="12" y1="22" x2="12" y2="15.5"/>
+                <polyline points="22 8.5 12 15.5 2 8.5"/>
+              </svg>
+            </div>
+            <h3>Bedrock AgentCore Console</h3>
+            <p>Create a new chat session to start interacting with your AgentCore Runtime agents. Select an agent, send prompts, and see streaming responses with tool invocation details.</p>
+            <button class="new-chat-btn" onclick="openNewChatModal()" style="margin:20px auto 0;width:fit-content;padding:10px 20px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Start New Chat
+            </button>
+          </div>
+        </div>
+        <div class="chat-messages" id="chat-messages" style="display:none"></div>
+        <div id="chat-input-area" class="chat-input-area" style="display:none">
+          <div class="chat-input-row">
+            <div class="chat-input-wrapper">
+              <textarea class="chat-input" id="chat-input" rows="1" placeholder="Send a message to the agent..."></textarea>
+            </div>
+            <button class="chat-send-btn" id="send-btn" onclick="sendMessage()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agents View -->
+      <div class="view-panel list-view" id="view-agents">
+        <div id="agents-content"></div>
+      </div>
+
+      <!-- Gateways View -->
+      <div class="view-panel list-view" id="view-gateways">
+        <div id="gateways-content"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- New Chat Modal -->
+<div class="modal-overlay" id="new-chat-modal">
+  <div class="modal-box">
+    <div class="modal-title">New Chat Session</div>
+    <div class="modal-desc">Select an agent runtime and start a conversation.</div>
+    <div class="form-group">
+      <label class="form-label">Agent Runtime</label>
+      <select class="form-select" id="modal-agent-select"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Session Name</label>
+      <input class="form-input" id="modal-session-name" placeholder="My Chat Session">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeNewChatModal()">Cancel</button>
+      <button class="btn-create" onclick="createNewChat()">Create Session</button>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

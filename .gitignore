@@ -1,0 +1,5 @@
+node_modules/
+history.json
+.kiro/
+scratchboard.md
+.aws-sam/
