@@ -459,7 +459,7 @@ function renderGatewaysView() {
             <td style="font-family:var(--font-mono);font-size:12px;color:var(--text-tertiary)">${g.protocolType || '-'}</td>
             <td style="font-size:12px;color:var(--text-tertiary)">${g.authorizerType || '-'}</td>
             <td><span class="arn-text">${esc(g.gatewayId)}</span></td>
-            <td><button onclick="event.stopPropagation();viewGatewayTargets('${g.gatewayId}')" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);color:var(--aurora-violet);padding:4px 10px;border-radius:var(--radius-sm);font-size:11px;font-family:var(--font-mono);cursor:pointer">View Targets</button></td>
+            <td><button onclick="event.stopPropagation();viewGatewayTargets('${g.gatewayId}')" style="background:var(--accent-light);border:1px solid var(--accent);color:var(--accent);padding:4px 10px;border-radius:var(--radius-sm);font-size:11px;font-family:var(--font-mono);cursor:pointer">View Targets</button></td>
           </tr>
         `).join('')}</tbody>
       </table>
@@ -495,7 +495,7 @@ async function viewGatewayTargets(gatewayId) {
         `).join('')}
       </div>`;
   } catch (e) {
-    el.innerHTML = `<div style="margin-top:20px;padding:20px;color:var(--aurora-rose);font-size:13px">Error loading targets: ${esc(e.message)}</div>`;
+    el.innerHTML = `<div style="margin-top:20px;padding:20px;color:var(--danger);font-size:13px">Error loading targets: ${esc(e.message)}</div>`;
   }
 }
 
@@ -673,6 +673,10 @@ function applyThemeVars(theme) {
   if (theme.text) { r.setProperty('--text-primary', theme.text); }
   if (theme.border) { r.setProperty('--border-color', theme.border); }
 
+  // Apply title
+  const logoText = $('.logo-text');
+  if (logoText && theme.title) logoText.textContent = theme.title;
+
   // Apply logo
   const logoIcon = $('.logo-icon');
   if (logoIcon) {
@@ -701,6 +705,7 @@ function loadThemeFromCookie() {
       if (theme.surface) $('#theme-surface').value = theme.surface;
       if (theme.text) $('#theme-text').value = theme.text;
       if (theme.border) $('#theme-border').value = theme.border;
+      if (theme.title) $('#theme-title').value = theme.title;
     }
     if (theme.logo) {
       const row = $('#logo-preview-row');
@@ -732,6 +737,7 @@ function previewTheme() {
     surface: $('#theme-surface').value,
     text: $('#theme-text').value,
     border: $('#theme-border').value,
+    title: $('#theme-title').value,
   });
 }
 
@@ -770,6 +776,7 @@ function saveTheme() {
     surface: $('#theme-surface').value,
     text: $('#theme-text').value,
     border: $('#theme-border').value,
+    title: $('#theme-title').value || 'AgentCore Console',
   };
   const logoImg = $('#logo-preview-img');
   if (logoImg && logoImg.src && logoImg.src.startsWith('data:')) {
@@ -789,6 +796,9 @@ function resetTheme() {
   $('#theme-surface').value = '#ffffff';
   $('#theme-text').value = '#1e293b';
   $('#theme-border').value = '#e2e8f0';
+  $('#theme-title').value = 'AgentCore Console';
+  const logoText = $('.logo-text');
+  if (logoText) logoText.textContent = 'AgentCore Console';
   removeLogo();
   $('#theme-editor-modal').classList.remove('active');
 }
