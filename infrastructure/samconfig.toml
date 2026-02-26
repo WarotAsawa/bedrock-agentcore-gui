@@ -1,9 +1,9 @@
 version = 0.1
 
 [default.deploy.parameters]
-stack_name = "agentcore-gui"
+stack_name = "agentcore-gui-custom"
 resolve_s3 = true
-s3_prefix = "agentcore-gui"
+s3_prefix = "agentcore-gui-custom"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true

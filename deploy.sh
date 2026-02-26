@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ─── Config ───
-STACK_NAME="agentcore-gui"
+STACK_NAME="agentcore-gui-custom"
 REGION="${AWS_REGION:-us-east-1}"
 TEMPLATE="infrastructure/template.yaml"
 

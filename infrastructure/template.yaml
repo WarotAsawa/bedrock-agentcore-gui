@@ -5,12 +5,15 @@ Description: Bedrock AgentCore GUI - ECS Fargate with existing VPC, public ALB
 Parameters:
   HostedZoneId:
     Type: String
+    Default: Z06170111LCZF339GRX97
     Description: Route53 hosted zone ID
   DomainName:
     Type: String
+    Default: custom-gui.warot.dev
     Description: Custom domain name (e.g. app.example.com)
   CertificateArn:
     Type: String
+    Default: arn:aws:acm:us-east-1:638806779113:certificate/5784ca07-91e0-4406-b5b8-ffe219725420
     Description: ACM certificate ARN for HTTPS
   ContainerImage:
     Type: String
@@ -29,18 +32,23 @@ Parameters:
     Default: '1024'
   VpcId:
     Type: AWS::EC2::VPC::Id
+    Default: vpc-0cfe699bb947aae86
     Description: VPC ID for the deployment
   PublicSubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
+    Default: subnet-042df6c0e7eddaa44,subnet-00ad623ea4b3eac5c,subnet-0be5fb80a601401ef
     Description: Public subnets for ALB (must have IGW route)
   PrivateSubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
+    Default: subnet-0e52d9d83ea75fd6c,subnet-06c6745485e95f30c,subnet-092b5424a02a07e02
     Description: Private subnets for ECS tasks
   ALBSecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
+    Default: sg-0302870a30e67d0a2
     Description: Security group for ALB (allow 80/443 inbound)
   ECSSecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
+    Default: sg-06110d8b46ae4af96
     Description: Security group for ECS tasks (allow traffic from ALB SG)
 
 Resources:
