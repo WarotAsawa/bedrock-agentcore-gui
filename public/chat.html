@@ -60,6 +60,10 @@
         <span class="region-dot"></span>
         <span id="region-display">us-east-1</span>
       </div>
+      <button class="theme-settings-btn" onclick="openThemeEditor()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Theme
+      </button>
     </div>
   </aside>
 
@@ -147,6 +151,48 @@
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeNewChatModal()">Cancel</button>
       <button class="btn-create" onclick="createNewChat()">Create Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- Theme Editor Modal -->
+<div class="modal-overlay" id="theme-editor-modal">
+  <div class="modal-box theme-editor">
+    <div class="modal-title">Theme Settings</div>
+    <div class="modal-desc">Upload a logo and customize your color palette. Changes are saved in your browser.</div>
+
+    <div class="form-group">
+      <label class="form-label">Company Logo</label>
+      <div class="logo-upload-area" id="logo-upload-area">
+        <input type="file" accept="image/*" id="logo-file-input" onchange="handleLogoUpload(event)">
+        <div class="upload-label" id="upload-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Click or drag to upload logo
+        </div>
+      </div>
+      <div class="logo-preview-row" id="logo-preview-row" style="display:none">
+        <img class="logo-preview" id="logo-preview-img" src="" alt="Logo">
+        <span style="font-size:12px;color:var(--text-secondary)">Current logo</span>
+        <button class="btn-remove-logo" onclick="removeLogo()">Remove</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Color Palette</label>
+      <div class="color-grid">
+        <div class="color-field"><label>Primary</label><input type="color" id="theme-primary" value="#1e40af" onchange="previewTheme()"></div>
+        <div class="color-field"><label>Accent</label><input type="color" id="theme-accent" value="#0ea5e9" onchange="previewTheme()"></div>
+        <div class="color-field"><label>Background</label><input type="color" id="theme-bg" value="#f4f6f9" onchange="previewTheme()"></div>
+        <div class="color-field"><label>Surface</label><input type="color" id="theme-surface" value="#ffffff" onchange="previewTheme()"></div>
+        <div class="color-field"><label>Text</label><input type="color" id="theme-text" value="#1e293b" onchange="previewTheme()"></div>
+        <div class="color-field"><label>Border</label><input type="color" id="theme-border" value="#e2e8f0" onchange="previewTheme()"></div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="resetTheme()">Reset Default</button>
+      <button class="btn-cancel" onclick="closeThemeEditor()">Cancel</button>
+      <button class="btn-create" onclick="saveTheme()">Save Theme</button>
     </div>
   </div>
 </div>
