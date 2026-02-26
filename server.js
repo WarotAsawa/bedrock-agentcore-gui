@@ -27,7 +27,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ─── Auth ───
-const CREDENTIALS = { username: process.env.APP_USERNAME || 'admin', password: process.env.APP_PASSWORD || 'changeme' };
+const CREDENTIALS = { username: process.env.APP_USERNAME || 'admin', password: process.env.APP_PASSWORD || 'P@ssw0rd' };
 const SESSION_SECRET = crypto.randomBytes(32).toString('hex');
 const sessions = new Map();
 
