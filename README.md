@@ -46,11 +46,17 @@ Browser → ALB (HTTPS) → ECS Fargate → Bedrock AgentCore APIs
 
 ### 1. Configure
 
-Edit the parameter defaults in `infrastructure/template.yaml` to match your environment:
+```bash
+# Copy example files and fill in your values
+cp .env.example .env
+```
+
+Edit `.env` with your credentials and AWS account info.
 
 - `VpcId`, `PublicSubnetIds`, `PrivateSubnetIds`
 - `ALBSecurityGroupId`, `ECSSecurityGroupId`
 - `HostedZoneId`, `DomainName`, `CertificateArn`
+
 
 ### 2. Deploy
 

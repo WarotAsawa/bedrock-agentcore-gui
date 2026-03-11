@@ -4,3 +4,5 @@ history.json
 scratchboard.md
 .aws-sam/
 .env
+infrastructure/template.yaml
+infrastructure/template.yaml

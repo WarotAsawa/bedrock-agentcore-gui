@@ -26,6 +26,12 @@ const dataClient = new BedrockAgentCoreClient({ region: REGION });
 app.use(express.json());
 app.use(cookieParser());
 
+// ─── Logging ───
+function log(level, msg, meta = {}) {
+  const entry = { ts: new Date().toISOString(), level, msg, ...meta };
+  console[level === 'error' ? 'error' : 'log'](JSON.stringify(entry));
+}
+
 // ─── Auth ───
 const CREDENTIALS = { username: process.env.APP_USERNAME || 'admin', password: process.env.APP_PASSWORD || 'P@ssw0rd' };
 const SESSION_SECRET = crypto.randomBytes(32).toString('hex');
@@ -103,43 +109,46 @@ app.get('/api/agents', async (_, res) => {
       agents.push(...(resp.agentRuntimes || []));
       nextToken = resp.nextToken;
     } while (nextToken);
+    log('info', 'ListAgentRuntimes', { count: agents.length });
     res.json(agents);
   } catch (err) {
-    console.error('ListAgentRuntimes error:', err);
+    log('error', 'ListAgentRuntimes failed', { error: err.message, code: err.name, requestId: err.$metadata?.requestId });
     res.status(500).json({ error: err.message });
   }
 });
 
 // Get agent runtime detail
 app.get('/api/agents/:id', async (req, res) => {
+  const { id } = req.params;
   try {
-    const resp = await controlClient.send(new GetAgentRuntimeCommand({
-      agentRuntimeId: req.params.id,
-    }));
+    const resp = await controlClient.send(new GetAgentRuntimeCommand({ agentRuntimeId: id }));
+    log('info', 'GetAgentRuntime', { agentRuntimeId: id, status: resp.status });
     res.json(resp);
   } catch (err) {
-    console.error('GetAgentRuntime error:', err);
+    log('error', 'GetAgentRuntime failed', { agentRuntimeId: id, error: err.message, code: err.name, requestId: err.$metadata?.requestId });
     res.status(500).json({ error: err.message });
   }
 });
 
 // List agent runtime endpoints
 app.get('/api/agents/:id/endpoints', async (req, res) => {
+  const { id } = req.params;
   try {
     const endpoints = [];
     let nextToken;
     do {
       const resp = await controlClient.send(new ListAgentRuntimeEndpointsCommand({
-        agentRuntimeId: req.params.id,
+        agentRuntimeId: id,
         maxResults: 100,
         nextToken,
       }));
       endpoints.push(...(resp.agentRuntimeEndpoints || []));
       nextToken = resp.nextToken;
     } while (nextToken);
+    log('info', 'ListAgentRuntimeEndpoints', { agentRuntimeId: id, count: endpoints.length });
     res.json(endpoints);
   } catch (err) {
-    console.error('ListAgentRuntimeEndpoints error:', err);
+    log('error', 'ListAgentRuntimeEndpoints failed', { agentRuntimeId: id, error: err.message, code: err.name, requestId: err.$metadata?.requestId });
     res.status(500).json({ error: err.message });
   }
 });
@@ -157,43 +166,46 @@ app.get('/api/gateways', async (_, res) => {
       gateways.push(...(resp.items || []));
       nextToken = resp.nextToken;
     } while (nextToken);
+    log('info', 'ListGateways', { count: gateways.length });
     res.json(gateways);
   } catch (err) {
-    console.error('ListGateways error:', err);
+    log('error', 'ListGateways failed', { error: err.message, code: err.name, requestId: err.$metadata?.requestId });
     res.status(500).json({ error: err.message });
   }
 });
 
 // Get gateway detail (includes endpoint URL)
 app.get('/api/gateways/:id', async (req, res) => {
+  const { id } = req.params;
   try {
-    const resp = await controlClient.send(new GetGatewayCommand({
-      gatewayId: req.params.id,
-    }));
+    const resp = await controlClient.send(new GetGatewayCommand({ gatewayId: id }));
+    log('info', 'GetGateway', { gatewayId: id, status: resp.status });
     res.json(resp);
   } catch (err) {
-    console.error('GetGateway error:', err);
+    log('error', 'GetGateway failed', { gatewayId: id, error: err.message, code: err.name, requestId: err.$metadata?.requestId });
     res.status(500).json({ error: err.message });
   }
 });
 
 // List gateway targets (MCP tools come from targets)
 app.get('/api/gateways/:id/targets', async (req, res) => {
+  const { id } = req.params;
   try {
     const targets = [];
     let nextToken;
     do {
       const resp = await controlClient.send(new ListGatewayTargetsCommand({
-        gatewayIdentifier: req.params.id,
+        gatewayIdentifier: id,
         maxResults: 100,
         nextToken,
       }));
       targets.push(...(resp.items || []));
       nextToken = resp.nextToken;
     } while (nextToken);
+    log('info', 'ListGatewayTargets', { gatewayId: id, count: targets.length });
     res.json(targets);
   } catch (err) {
-    console.error('ListGatewayTargets error:', err);
+    log('error', 'ListGatewayTargets failed', { gatewayId: id, error: err.message, code: err.name, requestId: err.$metadata?.requestId });
     res.status(500).json({ error: err.message });
   }
 });
@@ -205,6 +217,9 @@ app.post('/api/chat', async (req, res) => {
   if (!agentRuntimeArn || !prompt) {
     return res.status(400).json({ error: 'agentRuntimeArn and prompt are required' });
   }
+
+  const chatId = crypto.randomBytes(4).toString('hex');
+  log('info', 'Chat started', { chatId, agentRuntimeArn, sessionId: sessionId || 'new', promptLength: prompt.length });
 
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -225,6 +240,7 @@ app.post('/api/chat', async (req, res) => {
     if (qualifier) params.qualifier = qualifier;
 
     const resp = await dataClient.send(new InvokeAgentRuntimeCommand(params));
+    log('info', 'InvokeAgentRuntime connected', { chatId, runtimeSessionId: resp.runtimeSessionId, requestId: resp.$metadata?.requestId });
 
     // Send back the session ID
     res.write(`event: session\ndata: ${JSON.stringify({ runtimeSessionId: resp.runtimeSessionId })}\n\n`);
@@ -249,15 +265,32 @@ app.post('/api/chat', async (req, res) => {
         // Skip internal lifecycle noise
         if (parsed.init_event_loop || parsed.start === true || parsed.start_event_loop || parsed.stop_event_loop) continue;
 
+        // Normalize non-streaming result format: {"result": {"content": [{"text": "..."}]}}
+        if (parsed.result?.content) {
+          for (const block of parsed.result.content) {
+            if (block.text) {
+              res.write(`data: ${JSON.stringify({ data: block.text })}\n\n`);
+            }
+            if (block.reasoningContent?.reasoningText?.text) {
+              log('info', 'Chat reasoning', { chatId, length: block.reasoningContent.reasoningText.text.length });
+            }
+          }
+          if (parsed.session_id) {
+            res.write(`event: session\ndata: ${JSON.stringify({ runtimeSessionId: parsed.session_id })}\n\n`);
+          }
+          continue;
+        }
+
         // Forward clean event
         res.write(`data: ${JSON.stringify(parsed)}\n\n`);
       }
     }
 
     res.write('event: done\ndata: [DONE]\n\n');
+    log('info', 'Chat completed', { chatId });
     res.end();
   } catch (err) {
-    console.error('InvokeAgentRuntime error:', err);
+    log('error', 'InvokeAgentRuntime failed', { chatId, error: err.message, code: err.name, requestId: err.$metadata?.requestId });
     res.write(`event: error\ndata: ${JSON.stringify({ error: err.message })}\n\n`);
     res.end();
   }
@@ -269,5 +302,5 @@ app.get('/{*splat}', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`AgentCore GUI server running on port ${PORT}`);
+  log('info', 'Server started', { port: PORT, region: REGION });
 });

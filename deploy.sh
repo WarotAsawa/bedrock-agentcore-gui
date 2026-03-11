@@ -119,25 +119,36 @@ val "⚙️  Cluster:" "$CLUSTER"
 # ─── Force ECS Deployment ───
 step "🚀 Rolling out new ECS tasks"
 
-# Register new task def revision to force fresh image pull
-TASK_FAMILY="${STACK_NAME}-task"
-info "Registering new task definition revision..."
-aws ecs describe-task-definition --task-definition "$TASK_FAMILY" --region "$REGION" \
-  --query 'taskDefinition.{family:family,cpu:cpu,memory:memory,networkMode:networkMode,requiresCompatibilities:requiresCompatibilities,executionRoleArn:executionRoleArn,taskRoleArn:taskRoleArn,containerDefinitions:containerDefinitions}' \
-  --output json > /tmp/taskdef.json
+if [ "$MODE" = "full" ]; then
+  # Register new task def revision to pick up SAM changes
+  TASK_FAMILY="${STACK_NAME}-task"
+  info "Registering new task definition revision..."
+  aws ecs describe-task-definition --task-definition "$TASK_FAMILY" --region "$REGION" \
+    --query 'taskDefinition.{family:family,cpu:cpu,memory:memory,networkMode:networkMode,requiresCompatibilities:requiresCompatibilities,executionRoleArn:executionRoleArn,taskRoleArn:taskRoleArn,containerDefinitions:containerDefinitions}' \
+    --output json > /tmp/taskdef.json
 
-NEW_TD=$(aws ecs register-task-definition --cli-input-json file:///tmp/taskdef.json --region "$REGION" --query 'taskDefinition.taskDefinitionArn' --output text)
-ok "New task definition: ${NEW_TD##*/}"
+  NEW_TD=$(aws ecs register-task-definition --cli-input-json file:///tmp/taskdef.json --region "$REGION" --query 'taskDefinition.taskDefinitionArn' --output text)
+  ok "New task definition: ${NEW_TD##*/}"
 
-info "Updating ECS service..."
-aws ecs update-service \
-  --cluster "$CLUSTER" \
-  --service "$SERVICE" \
-  --task-definition "$NEW_TD" \
-  --force-new-deployment \
-  --region "$REGION" \
-  --query 'service.deployments[0].{status:status,running:runningCount,desired:desiredCount}' \
-  --output table 2>&1
+  info "Updating ECS service..."
+  aws ecs update-service \
+    --cluster "$CLUSTER" \
+    --service "$SERVICE" \
+    --task-definition "$NEW_TD" \
+    --force-new-deployment \
+    --region "$REGION" \
+    --query 'service.deployments[0].{status:status,running:runningCount,desired:desiredCount}' \
+    --output table 2>&1
+else
+  info "Force new deployment (image: ${IMAGE_TAG})..."
+  aws ecs update-service \
+    --cluster "$CLUSTER" \
+    --service "$SERVICE" \
+    --force-new-deployment \
+    --region "$REGION" \
+    --query 'service.deployments[0].{status:status,running:runningCount,desired:desiredCount}' \
+    --output table 2>&1
+fi
 ok "ECS deployment triggered"
 
 # ─── Wait for service stable ───

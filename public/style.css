@@ -210,7 +210,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:url("data:ima
   .app-layout{grid-template-columns:1fr}
   .sidebar{position:fixed;left:-280px;top:0;bottom:0;width:280px;z-index:100;transition:left var(--transition-smooth)}
   .sidebar.open{left:0}
-  .sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99}
+  .sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1}
   .sidebar-backdrop.open{display:block}
   .mobile-menu-btn{display:block}
   .tab-group{display:none}
